@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: camplog-backend
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/camplog}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 3333
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+
+app:
+  jwt:
+    secret: ${JWT_SECRET_KEY:dGhpcy1pcy1hLXNlY3VyZS1hbmQtc3Ryb25nLWtleS1mb3ItY2FtcGxvZy1qd3Qtc2lnbmluZy1wcm9k}
+    expiration: 86400000 # 24 horas em milissegundos
+  email:
+    provider: resend # resend ou mock
+    api-key: ${EMAIL_SERVICE_API_KEY:mock-key}
+    from: "CampLog <no-reply@camplog.com>"
+  data-platform:
+    webhook-url: ${DATA_PLATFORM_WEBHOOK_URL:http://localhost:8000/api/v1/events/user-created}
+    secret-token: ${DATA_PLATFORM_SECRET:camp-log-data-sec-123}
+
+logging:
+  level:
+    org.springframework.security: INFO
+    com.camplog: DEBUG
