@@ -36,6 +36,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/oauth2/callback/**").permitAll()
                 .requestMatchers("/api/v1/auth/oauth2/callback/**").permitAll() // aceitar GET para fluxos de callback
+                .requestMatchers("/oauth2/authorization/**").permitAll() // Permite a simulação de autorização do OAuth2
+                .requestMatchers("/error").permitAll() // Permite a visualização de erros sem mascaramento de 403
                 .requestMatchers("/actuator/**").permitAll() // Permitir coleta de métricas pelo Prometheus
                 .anyRequest().authenticated()
             )

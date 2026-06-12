@@ -29,6 +29,14 @@ management:
       show-details: always
 
 app:
+  oauth2:
+    redirect-uri: ${OAUTH2_REDIRECT_URI:http://localhost:3000/oauth2/callback}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+      client-secret: ${GOOGLE_CLIENT_SECRET:}
+    github:
+      client-id: ${GITHUB_CLIENT_ID:}
+      client-secret: ${GITHUB_CLIENT_SECRET:}
   jwt:
     secret: ${JWT_SECRET_KEY:dGhpcy1pcy1hLXNlY3VyZS1hbmQtc3Ryb25nLWtleS1mb3ItY2FtcGxvZy1qd3Qtc2lnbmluZy1wcm9k}
     expiration: 86400000 # 24 horas em milissegundos

@@ -10,4 +10,6 @@ import lombok.*;
 public class OAuth2CallbackRequest {
     @NotBlank(message = "O código do provedor OAuth é obrigatório")
     private String code;
+
+    private String redirectUri;
 }

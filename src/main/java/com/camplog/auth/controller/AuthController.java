@@ -40,7 +40,7 @@ public class AuthController {
             @Valid @RequestBody OAuth2CallbackRequest request
     ) {
         log.info("Recebida requisição REST de callback OAuth2 para o provedor: {}", provider);
-        AuthResponse response = authService.processOAuth2Callback(provider, request.getCode());
+        AuthResponse response = authService.processOAuth2Callback(provider, request.getCode(), request.getRedirectUri());
         return ResponseEntity.ok(response);
     }
 
