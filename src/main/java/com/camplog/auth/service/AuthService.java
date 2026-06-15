@@ -78,7 +78,7 @@ public class AuthService {
         // Dispara o evento de criação de usuário para as tarefas de segundo plano
         eventPublisher.publishEvent(new UserCreatedEvent(this, savedUser));
 
-        String token = jwtService.generateToken(savedUser);
+        String token = generateTokenWithClaims(savedUser);
         return buildAuthResponse(token, savedUser);
     }
 
@@ -268,7 +268,7 @@ public class AuthService {
             eventPublisher.publishEvent(new UserCreatedEvent(this, user));
         }
 
-        String token = jwtService.generateToken(user);
+        String token = generateTokenWithClaims(user);
         return buildAuthResponse(token, user);
     }
 
@@ -283,7 +283,7 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciais inválidas.");
         }
 
-        String token = jwtService.generateToken(user);
+        String token = generateTokenWithClaims(user);
         return buildAuthResponse(token, user);
     }
 
@@ -295,7 +295,7 @@ public class AuthService {
         dbUser.setRole(newRole);
         User savedUser = userRepository.save(dbUser);
         
-        String token = jwtService.generateToken(savedUser);
+        String token = generateTokenWithClaims(savedUser);
         return buildAuthResponse(token, savedUser);
     }
 
@@ -313,5 +313,11 @@ public class AuthService {
                         .createdAt(createdAtStr)
                         .build())
                 .build();
+    }
+    private String generateTokenWithClaims(User user) {
+        java.util.Map<String, Object> claims = new java.util.HashMap<>();
+        claims.put("userId", user.getId());
+        claims.put("role", user.getRole());
+        return jwtService.generateToken(claims, user);
     }
 }

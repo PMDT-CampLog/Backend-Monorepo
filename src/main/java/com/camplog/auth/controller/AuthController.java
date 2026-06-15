@@ -57,7 +57,7 @@ public class AuthController {
             @RequestBody Map<String, String> request
     ) {
         String newRole = request.get("role");
-        if (newRole == null || (!newRole.equals("member") && !newRole.equals("creator"))) {
+        if (newRole == null || (!newRole.equals("member") && !newRole.equals("creator") && !newRole.equals("apoiador"))) {
             throw new IllegalArgumentException("Função (role) inválida ou não especificada.");
         }
         log.info("Recebida requisição REST de atualização de role para o usuário {}: {}", user.getEmail(), newRole);

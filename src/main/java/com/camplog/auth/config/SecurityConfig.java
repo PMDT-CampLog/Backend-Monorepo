@@ -18,8 +18,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -39,6 +42,8 @@ public class SecurityConfig {
                 .requestMatchers("/oauth2/authorization/**").permitAll() // Permite a simulação de autorização do OAuth2
                 .requestMatchers("/error").permitAll() // Permite a visualização de erros sem mascaramento de 403
                 .requestMatchers("/actuator/**").permitAll() // Permitir coleta de métricas pelo Prometheus
+                .requestMatchers(HttpMethod.GET, "/api/v1/profile/**").permitAll() // Perfil público de apoiadores
+                .requestMatchers(HttpMethod.GET, "/media/**").permitAll() // Servir mídias locais em dev
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

@@ -38,6 +38,12 @@ public class User implements UserDetails {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    @Column(name = "cover_url")
+    private String coverUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
     @Column(nullable = false)
     @Builder.Default
     private String role = "member";
