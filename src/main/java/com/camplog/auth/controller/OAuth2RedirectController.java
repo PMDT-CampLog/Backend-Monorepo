@@ -43,7 +43,8 @@ public class OAuth2RedirectController {
                         "?client_id=" + googleClientId +
                         "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8) +
                         "&response_type=code" +
-                        "&scope=" + URLEncoder.encode("openid email profile", StandardCharsets.UTF_8);
+                        "&scope=" + URLEncoder.encode("openid email profile", StandardCharsets.UTF_8) +
+                        "&state=google";
                 log.info("Redirecionando para tela de consentimento REAL do Google...");
             } else {
                 log.warn("Chave GOOGLE_CLIENT_ID não configurada. Ativando fallback simulado (Mock).");
@@ -55,7 +56,8 @@ public class OAuth2RedirectController {
                 targetUrl = "https://github.com/login/oauth/authorize" +
                         "?client_id=" + githubClientId +
                         "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8) +
-                        "&scope=" + URLEncoder.encode("user:email read:user", StandardCharsets.UTF_8);
+                        "&scope=" + URLEncoder.encode("user:email read:user", StandardCharsets.UTF_8) +
+                        "&state=github";
                 log.info("Redirecionando para tela de consentimento REAL do GitHub...");
             } else {
                 log.warn("Chave GITHUB_CLIENT_ID não configurada. Ativando fallback simulado (Mock).");
