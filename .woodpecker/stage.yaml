@@ -1,0 +1,75 @@
+# ==============================================================================
+# CampLog Backend - Pipeline de Staging (QA)
+# Disparado a cada push na branch 'main'
+# ==============================================================================
+
+when:
+  event: push
+  branch: main
+
+steps:
+  # --- 1. GIT (Verificar status e logs) ---
+  git-info:
+    image: alpine/git
+    commands:
+      - echo "=== [GIT INFO] Verificando sincronização com o GitHub ==="
+      - git status
+      - git log -1 --oneline
+
+  # --- 2. INSTALL (Instalar/baixar dependências em cache) ---
+  install-deps:
+    image: maven:3.9.5-eclipse-temurin-17-alpine
+    commands:
+      - echo "=== [INSTALL] Baixando dependências do Maven ==="
+      - mvn dependency:go-offline -B
+
+  # --- 3. LINT (Análise estática / compilação básica) ---
+  lint-check:
+    image: maven:3.9.5-eclipse-temurin-17-alpine
+    commands:
+      - echo "=== [LINT] Executando validação de compilação ==="
+      - mvn clean compile -B
+
+  # --- 4. TESTS (Executar testes automatizados) ---
+  test-run:
+    image: maven:3.9.5-eclipse-temurin-17-alpine
+    commands:
+      - echo "=== [TESTS] Executando testes unitários e de integração ==="
+      - mvn test -B
+
+  # --- 5. GET CREDENTIALS ENV (Verificar secrets de Staging) ---
+  get-credentials-env:
+    image: alpine:latest
+    commands:
+      - echo "=== [GET CREDENTIALS ENV] Validando chaves secretas do Woodpecker ==="
+      - |
+        if [ -z "$${GITHUB_CLIENT_ID}" ] || [ -z "$${GITHUB_CLIENT_SECRET}" ]; then
+          echo "AVISO: Credenciais do GitHub OAuth não configuradas no Woodpecker CI!"
+        else
+          echo "Credenciais do GitHub OAuth validadas."
+        fi
+    environment:
+      GITHUB_CLIENT_ID:
+        from_secret: github_client_id
+      GITHUB_CLIENT_SECRET:
+        from_secret: github_client_secret
+
+  # --- 6. DEPLOY (Atualização do container no Docker Compose) ---
+  deploy-staging:
+    image: docker:cli
+    volumes:
+      # Montado no runner para se comunicar com o daemon Docker do host
+      - /var/run/docker.sock:/var/run/docker.sock
+    commands:
+      - echo "=== [DEPLOY] Atualizando serviço Backend no Staging da OCI ==="
+      # 1. Cria uma estrutura temporária que simula o monorepo local para manter caminhos relativos
+      - mkdir -p ../camplog-build/Backend-Monorepo
+      - cp -r . ../camplog-build/Backend-Monorepo/
+      # 2. Clona o repositório de infraestrutura de DevOps de forma segura
+      - git clone https://github.com/CampLog/Devops-tooling.git ../camplog-build/Devops-tooling
+      # 3. Executa a compilação e deploy do backend a partir do diretório do docker-compose
+      - cd ../camplog-build/Devops-tooling
+      - docker compose -f docker-compose.stage.yml up -d --build backend
+      # 4. Limpeza da pasta temporária no host
+      - cd -
+      - rm -rf ../camplog-build
