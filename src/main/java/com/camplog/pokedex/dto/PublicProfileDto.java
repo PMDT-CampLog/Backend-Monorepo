@@ -17,4 +17,5 @@ public class PublicProfileDto {
     private String avatarUrl;
     private String coverUrl;
     private String themeColors;
+    private String role;
 }

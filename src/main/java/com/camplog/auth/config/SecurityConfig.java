@@ -45,6 +45,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/profile/**").permitAll() // Perfil público de apoiadores
                 .requestMatchers(HttpMethod.GET, "/api/v1/pokedex/**").permitAll() // Perfis públicos e validação de username da Pokedex
                 .requestMatchers(HttpMethod.GET, "/media/**").permitAll() // Servir mídias locais em dev
+                .requestMatchers(HttpMethod.GET, "/api/v1/connections/*/CREATOR/followers").permitAll() // Lista de seguidores pública
+                .requestMatchers(HttpMethod.GET, "/api/v1/connections/*/CREATOR/following").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/connections/*/SUPPORTER/followers").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/connections/*/SUPPORTER/following").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

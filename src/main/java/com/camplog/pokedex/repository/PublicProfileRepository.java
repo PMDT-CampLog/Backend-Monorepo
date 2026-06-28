@@ -4,6 +4,9 @@ import com.camplog.pokedex.model.PublicProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -11,4 +14,7 @@ public interface PublicProfileRepository extends JpaRepository<PublicProfile, St
     Optional<PublicProfile> findByUsername(String username);
     Optional<PublicProfile> findByUserId(String userId);
     boolean existsByUsername(String username);
+
+    @Query("SELECT p FROM PublicProfile p JOIN p.user u WHERE LOWER(p.username) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(u.name) LIKE LOWER(CONCAT('%', :q, '%'))")
+    List<PublicProfile> searchProfiles(@Param("q") String q);
 }

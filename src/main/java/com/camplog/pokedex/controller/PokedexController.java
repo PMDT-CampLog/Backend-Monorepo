@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,6 +28,11 @@ public class PokedexController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<PublicProfileDto> getProfileByUserId(@PathVariable String userId) {
         return ResponseEntity.ok(pokedexService.getProfileByUserId(userId));
+    }
+
+    @GetMapping("/query/search")
+    public ResponseEntity<List<PublicProfileDto>> searchProfiles(@RequestParam String q) {
+        return ResponseEntity.ok(pokedexService.searchProfiles(q));
     }
 
     @GetMapping("/check/username")

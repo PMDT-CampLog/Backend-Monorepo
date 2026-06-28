@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -116,6 +119,18 @@ public class PokedexService {
                 .avatarUrl(profile.getAvatarUrl())
                 .coverUrl(profile.getCoverUrl())
                 .themeColors(profile.getThemeColors())
+                .role(profile.getUser().getRole())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PublicProfileDto> searchProfiles(String query) {
+        String cleanQuery = query != null ? query.trim() : "";
+        if (cleanQuery.startsWith("@")) {
+            cleanQuery = cleanQuery.substring(1);
+        }
+        return publicProfileRepository.searchProfiles(cleanQuery).stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
     }
 }
