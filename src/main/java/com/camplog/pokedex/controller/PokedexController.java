@@ -30,8 +30,8 @@ public class PokedexController {
     }
 
     @GetMapping("/check/username")
-    public ResponseEntity<Map<String, Boolean>> checkUsername(@RequestParam String q) {
-        boolean available = pokedexService.isUsernameAvailable(q);
+    public ResponseEntity<Map<String, Boolean>> checkUsername(@RequestParam String username) {
+        boolean available = pokedexService.isUsernameAvailable(username);
         return ResponseEntity.ok(Map.of("available", available));
     }
 
