@@ -1,14 +1,13 @@
 package com.camplog.profile.service;
 
+import com.camplog.Bond.service.MediaService;
 import com.camplog.auth.model.User;
 import com.camplog.auth.repository.UserRepository;
-import com.camplog.profile.dto.ProfileResponse;
+import com.camplog.Bond.dto.ProfileResponse;
 import com.camplog.profile.dto.UpdateProfileRequest;
-import com.camplog.profile.model.SupporterProfile;
 import com.camplog.profile.repository.PostLikeRepository;
 import com.camplog.profile.repository.PostRepository;
-import com.camplog.profile.repository.SupporterProfileRepository;
-import com.camplog.profile.repository.UserInterestRepository;
+import com.camplog.Bond.repository.SupporterProfileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

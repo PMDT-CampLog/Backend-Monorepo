@@ -3,7 +3,6 @@ package com.camplog.profile.controller;
 import com.camplog.auth.model.User;
 import com.camplog.profile.dto.UpdateInterestsRequest;
 import com.camplog.profile.model.UserInterest;
-import com.camplog.profile.repository.UserInterestRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

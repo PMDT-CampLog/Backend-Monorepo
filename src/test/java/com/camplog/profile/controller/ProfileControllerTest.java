@@ -3,7 +3,7 @@ package com.camplog.profile.controller;
 import com.camplog.auth.model.User;
 import com.camplog.auth.config.JwtService;
 import com.camplog.auth.repository.UserRepository;
-import com.camplog.profile.dto.ProfileResponse;
+import com.camplog.Bond.dto.ProfileResponse;
 import com.camplog.profile.dto.UpdateProfileRequest;
 import com.camplog.profile.service.ProfileService;
 import com.fasterxml.jackson.databind.ObjectMapper;

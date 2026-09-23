@@ -1,8 +1,8 @@
 package com.camplog.profile.service;
 
+import com.camplog.Bond.service.MediaService;
 import com.camplog.auth.model.User;
 import com.camplog.profile.dto.CreatePostRequest;
-import com.camplog.profile.dto.PostPageResponse;
 import com.camplog.profile.dto.PostResponse;
 import com.camplog.profile.model.Post;
 import com.camplog.profile.model.PostMedia;
@@ -22,7 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
