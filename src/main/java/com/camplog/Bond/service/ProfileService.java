@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.print.attribute.standard.Media;
 import java.time.format.DateTimeFormatter;
 
 @RequiredArgsConstructor
@@ -46,28 +48,34 @@ public class ProfileService {
     }
 
     @Transactional
+    public void ReplaceAvatar(User authenticatedUser, MultipartFile file){
+        log.info("Update de avatar para o usuário: {}", authenticatedUser.getId());
+
+        String avatarUrl = authenticatedUser.getAvatarUrl();
+
+        MediaService.MediaUploadResult result = mediaService.uploadAvatar(file, authenticatedUser.getId());
+        authenticatedUser.setAvatarUrl(result.url());
+        userRepository.save(authenticatedUser);
+
+        if(avatarUrl != null && !avatarUrl.isBlank()){
+            String oldKey = mediaService.extractKeyFromUrl(avatarUrl);
+            if(oldKey != null){
+                mediaService.deleteMedia(oldKey);
+            }
+        }
+    }
+
+    @Transactional
     public ProfileResponse uploadAvatar(User authenticatedUser, MultipartFile file) {
         log.info("Upload de avatar para o usuário: {}", authenticatedUser.getId());
-        MediaService.MediaUploadResult result = mediaService.uploadAvatar(file, authenticatedUser.getId());
-
-        User user = userRepository.findById(authenticatedUser.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
-        user.setAvatarUrl(result.url());
-        userRepository.save(user);
-
-        return getProfile(user.getId());
+        ReplaceAvatar(authenticatedUser, file);
+        return getProfile(authenticatedUser.getId());
     }
 
     @Transactional
     public ProfileResponse uploadCover(User authenticatedUser, MultipartFile file) {
         log.info("Upload de capa para o usuário: {}", authenticatedUser.getId());
-        MediaService.MediaUploadResult result = mediaService.uploadCover(file, authenticatedUser.getId());
-
-        User user = userRepository.findById(authenticatedUser.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
-        user.setCoverUrl(result.url());
-        userRepository.save(user);
-
-        return getProfile(user.getId());
+        ReplaceAvatar(authenticatedUser, file);
+        return getProfile(authenticatedUser.getId());
     }
 }

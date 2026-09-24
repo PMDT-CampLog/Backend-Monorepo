@@ -34,25 +34,4 @@ public class PokedexController {
         boolean available = pokedexService.isUsernameAvailable(username);
         return ResponseEntity.ok(Map.of("available", available));
     }
-
-    @PutMapping("/me")
-    public ResponseEntity<Void> updateMyProfile(
-            @AuthenticationPrincipal User user,
-            @RequestPart(value = "data", required = false) UpdatePublicProfileDto dto,
-            @RequestPart(value = "avatar", required = false) MultipartFile avatar,
-            @RequestPart(value = "cover", required = false) MultipartFile cover
-    ) {
-        String userId = user.getId();
-
-        if (dto != null) {
-            pokedexService.createOrUpdateProfileSync(userId, dto);
-        }
-
-        if ((avatar != null && !avatar.isEmpty()) || (cover != null && !cover.isEmpty())) {
-            // Process media asynchronously, returning 202 immediately to frontend
-            pokedexService.processMediaUploadAsync(userId, avatar, cover);
-        }
-
-        return ResponseEntity.accepted().build();
-    }
 }

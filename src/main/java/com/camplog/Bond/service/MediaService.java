@@ -199,6 +199,15 @@ public class MediaService {
         }
     }
 
+    // Pega a imagem salva no s3 com a url e extrai a key
+    public String extractKeyFromUrl(String url) {
+        if (url == null || url.isBlank() || !url.startsWith(cdnBaseUrl)) {
+            return null;
+        }
+        String key = url.substring(cdnBaseUrl.length());
+        return key.startsWith("/") ? key.substring(1) : key;
+    }
+
     /**
      * Resultado de um upload de mídia contendo a URL pública e a chave de armazenamento.
      */
