@@ -10,5 +10,6 @@ import java.util.Optional;
 public interface PublicProfileRepository extends JpaRepository<PublicProfile, String> {
     Optional<PublicProfile> findByUsername(String username);
     Optional<PublicProfile> findByUserId(String userId);
+
     boolean existsByUsername(String username);
 }

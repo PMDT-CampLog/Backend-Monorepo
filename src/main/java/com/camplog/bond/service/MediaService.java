@@ -1,4 +1,4 @@
-package com.camplog.profile.service;
+package com.camplog.bond.service;
 
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -197,6 +197,15 @@ public class MediaService {
             log.error("Falha ao processar imagem", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Falha ao processar a imagem.");
         }
+    }
+
+    // Pega a imagem salva no s3 com a url e extrai a key
+    public String extractKeyFromUrl(String url) {
+        if (url == null || url.isBlank() || !url.startsWith(cdnBaseUrl)) {
+            return null;
+        }
+        String key = url.substring(cdnBaseUrl.length());
+        return key.startsWith("/") ? key.substring(1) : key;
     }
 
     /**

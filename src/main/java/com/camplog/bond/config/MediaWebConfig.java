@@ -1,4 +1,4 @@
-package com.camplog.profile.config;
+package com.camplog.bond.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

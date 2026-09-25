@@ -1,4 +1,4 @@
-package com.camplog.profile.model;
+package com.camplog.bond.model;
 
 import com.camplog.auth.model.User;
 import jakarta.persistence.*;
@@ -15,8 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SupporterProfile {
-
+public class UserProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;

@@ -26,6 +26,7 @@ public class PublicProfile {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
+    //ARROBA
     @Column(name = "username", length = 50, nullable = false, unique = true)
     private String username;
 
