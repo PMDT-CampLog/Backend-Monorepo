@@ -1,0 +1,77 @@
+# ==============================================================================
+# CampLog Backend - Pipeline de CI/CD Universal (100% Local)
+# Forno = branch 'forno'
+# Staging = branch 'main'
+# Prod = imagem da 'release' (tags v*)
+# ==============================================================================
+
+when:
+  event: [push, pull_request, tag, release]
+
+steps:
+  # --- 1. GIT INFO (Inspeciona dados do commit ou tag) ---
+  git-info:
+    image: alpine/git
+    commands:
+      - echo "=== [GIT INFO] Informacoes do Commit ==="
+      - echo "Evento - $CI_PIPELINE_EVENT"
+      - echo "Branch - $CI_COMMIT_BRANCH"
+      - echo "Tag - $CI_COMMIT_TAG"
+      - echo "Autor - $CI_COMMIT_AUTHOR"
+      - echo "Commit - $CI_COMMIT_SHA"
+      - git status
+      - git log -1 --oneline
+
+  # --- 2. DEPENDÊNCIAS (Baixa e valida dependências Maven) ---
+  install-deps:
+    image: maven:3.9.5-eclipse-temurin-17-alpine
+    commands:
+      - echo "=== [INSTALL] Validando e baixando dependencias Maven ==="
+      - mvn dependency:go-offline -B
+
+  # --- 3. LINT & COMPILE (Verificação de sintaxe e compilação do código) ---
+  lint-compile:
+    image: maven:3.9.5-eclipse-temurin-17-alpine
+    commands:
+      - echo "=== [LINT & COMPILE] Compilando codigo Java Spring Boot ==="
+      - mvn clean compile -B
+
+  # --- 4. TESTS (Execução dos testes automatizados) ---
+  test-run:
+    image: maven:3.9.5-eclipse-temurin-17-alpine
+    commands:
+      - echo "=== [TESTS] Executando testes unitarios e de integracao ==="
+      - mvn test -B
+
+  # --- 5. DOCKER BUILD & TAG (Gera imagem local de acordo com o ambiente) ---
+  build-docker:
+    image: docker:cli
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    when:
+      event: [push, tag, release]
+    commands:
+      - echo "=== [DOCKER] Todos os testes passaram! Gerando imagem local ==="
+      - |
+        if [ -n "$${CI_COMMIT_TAG}" ] || [ "$${CI_PIPELINE_EVENT}" = "tag" ] || [ "$${CI_PIPELINE_EVENT}" = "release" ]; then
+          VERSION="$${CI_COMMIT_TAG:-latest}"
+          echo ">>> [PRODUCAO] Release/Tag detectada: $$VERSION"
+          docker build -t camplog-backend:prod -t camplog-backend:$$VERSION .
+          echo "=== Imagens 'camplog-backend:prod' e 'camplog-backend:$$VERSION' criadas com sucesso! ==="
+        else
+          BRANCH_LOWER=$$(echo "$${CI_COMMIT_BRANCH}" | tr '[:upper:]' '[:lower:]')
+          case "$$BRANCH_LOWER" in
+            main|master)
+              TAG="staging"
+              ;;
+            forno)
+              TAG="forno"
+              ;;
+            *)
+              TAG="$$BRANCH_LOWER"
+              ;;
+          esac
+          echo ">>> [BRANCH] Gerando imagem para a branch $$BRANCH_LOWER -> Tag: $$TAG"
+          docker build -t camplog-backend:$$TAG -t camplog-backend:$${CI_COMMIT_SHA:0:7} .
+          echo "=== Imagem 'camplog-backend:$$TAG' criada com sucesso! ==="
+        fi
