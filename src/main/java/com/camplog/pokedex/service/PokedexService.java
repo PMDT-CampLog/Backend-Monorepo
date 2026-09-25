@@ -1,5 +1,6 @@
 package com.camplog.pokedex.service;
 
+import com.camplog.auth.event.UserCreatedEvent;
 import com.camplog.auth.model.User;
 import com.camplog.auth.repository.UserRepository;
 import com.camplog.pokedex.dto.PublicProfileDto;
@@ -8,10 +9,13 @@ import com.camplog.pokedex.model.PublicProfile;
 import com.camplog.pokedex.repository.PublicProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,14 +31,63 @@ public class PokedexService {
 
     public PublicProfileDto getProfileByUsername(String username) {
         PublicProfile profile = publicProfileRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Perfil não encontrado para o username: " + username));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Perfil não encontrado para o username: " + username));
         return mapToDto(profile);
     }
 
+    @Transactional
     public PublicProfileDto getProfileByUserId(String userId) {
         PublicProfile profile = publicProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Perfil não encontrado"));
+                .orElseGet(() -> autoCreateProfileForUser(userId));
         return mapToDto(profile);
+    }
+
+    @Transactional
+    public PublicProfile autoCreateProfileForUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        PublicProfile existing = publicProfileRepository.findByUserId(userId).orElse(null);
+        if (existing != null) {
+            return existing;
+        }
+
+        String baseUsername = (user.getName() != null && !user.getName().trim().isEmpty())
+                ? user.getName().toLowerCase().replaceAll("[^a-zA-Z0-9]", "")
+                : "user";
+        if (baseUsername.isEmpty()) {
+            baseUsername = "user";
+        }
+
+        String finalUsername = baseUsername;
+        int suffix = 1;
+        while (publicProfileRepository.existsByUsername(finalUsername)) {
+            finalUsername = baseUsername + suffix;
+            suffix++;
+        }
+
+        PublicProfile profile = PublicProfile.builder()
+                .user(user)
+                .username(finalUsername)
+                .bio(user.getBio())
+                .avatarUrl(user.getAvatarUrl())
+                .coverUrl(user.getCoverUrl())
+                .build();
+
+        log.info("[POKEDEX] Perfil público criado automaticamente para o usuário {}: @{}", userId, finalUsername);
+        return publicProfileRepository.save(profile);
+    }
+
+    @EventListener
+    @Transactional
+    public void handleUserCreatedEvent(UserCreatedEvent event) {
+        if (event != null && event.getUser() != null) {
+            try {
+                autoCreateProfileForUser(event.getUser().getId());
+            } catch (Exception e) {
+                log.error("[POKEDEX] Falha ao auto-criar perfil público para o novo usuário: {}", e.getMessage(), e);
+            }
+        }
     }
 
     public boolean isUsernameAvailable(String username) {

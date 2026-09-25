@@ -26,7 +26,7 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping("/me/posts")
-    @PreAuthorize("hasRole('APOIADOR')")
+    @PreAuthorize("hasAnyRole('APOIADOR', 'CREATOR', 'MEMBER')")
     public ResponseEntity<PostResponse> createPost(
             @AuthenticationPrincipal User user,
             @Valid @RequestBody CreatePostRequest request
@@ -59,7 +59,7 @@ public class PostController {
     }
 
     @PutMapping("/me/posts/{postId}")
-    @PreAuthorize("hasRole('APOIADOR')")
+    @PreAuthorize("hasAnyRole('APOIADOR', 'CREATOR', 'MEMBER')")
     public ResponseEntity<PostResponse> updatePost(
             @AuthenticationPrincipal User user,
             @PathVariable String postId,
@@ -70,7 +70,7 @@ public class PostController {
     }
 
     @DeleteMapping("/me/posts/{postId}")
-    @PreAuthorize("hasRole('APOIADOR')")
+    @PreAuthorize("hasAnyRole('APOIADOR', 'CREATOR', 'MEMBER')")
     public ResponseEntity<Void> deletePost(
             @AuthenticationPrincipal User user,
             @PathVariable String postId
@@ -80,7 +80,7 @@ public class PostController {
     }
 
     @PostMapping("/me/posts/{postId}/media")
-    @PreAuthorize("hasRole('APOIADOR')")
+    @PreAuthorize("hasAnyRole('APOIADOR', 'CREATOR', 'MEMBER')")
     public ResponseEntity<PostResponse> addMedia(
             @AuthenticationPrincipal User user,
             @PathVariable String postId,

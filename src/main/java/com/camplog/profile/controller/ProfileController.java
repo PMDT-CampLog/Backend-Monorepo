@@ -29,7 +29,7 @@ public class ProfileController {
     }
 
     @PutMapping("/me")
-    @PreAuthorize("hasAnyRole('MEMBER', 'APOIADOR')")
+    @PreAuthorize("hasAnyRole('MEMBER', 'APOIADOR', 'CREATOR')")
     public ResponseEntity<ProfileResponse> updateProfile(
             @AuthenticationPrincipal User user,
             @Valid @RequestBody UpdateProfileRequest request
@@ -40,7 +40,7 @@ public class ProfileController {
     }
 
     @PostMapping("/me/avatar")
-    @PreAuthorize("hasAnyRole('MEMBER', 'APOIADOR')")
+    @PreAuthorize("hasAnyRole('MEMBER', 'APOIADOR', 'CREATOR')")
     public ResponseEntity<ProfileResponse> uploadAvatar(
             @AuthenticationPrincipal User user,
             @RequestParam("file") MultipartFile file
@@ -51,7 +51,7 @@ public class ProfileController {
     }
 
     @PostMapping("/me/cover")
-    @PreAuthorize("hasAnyRole('MEMBER', 'APOIADOR')")
+    @PreAuthorize("hasAnyRole('MEMBER', 'APOIADOR', 'CREATOR')")
     public ResponseEntity<ProfileResponse> uploadCover(
             @AuthenticationPrincipal User user,
             @RequestParam("file") MultipartFile file
