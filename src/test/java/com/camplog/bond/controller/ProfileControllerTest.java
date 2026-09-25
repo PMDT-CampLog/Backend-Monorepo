@@ -1,11 +1,12 @@
-package com.camplog.profile.controller;
+package com.camplog.bond.controller;
 
 import com.camplog.auth.model.User;
 import com.camplog.auth.config.JwtService;
 import com.camplog.auth.repository.UserRepository;
-import com.camplog.Bond.dto.ProfileResponse;
-import com.camplog.profile.dto.UpdateProfileRequest;
-import com.camplog.profile.service.ProfileService;
+import com.camplog.bond.dto.ProfileResponse;
+import com.camplog.bond.service.MediaService;
+import com.camplog.pokedex.dto.UpdateProfileRequest;
+import com.camplog.bond.service.ProfileService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -42,10 +44,14 @@ class ProfileControllerTest {
     @MockBean
     private UserRepository userRepository;
 
+    @MockBean
+    private MediaService mediaService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
     private ProfileResponse profileResponse;
+
     private UpdateProfileRequest updateRequest;
 
     @BeforeEach
@@ -78,7 +84,7 @@ class ProfileControllerTest {
     void getProfile_validUserId_returnsProfileResponse() throws Exception {
         when(profileService.getProfile("user-123")).thenReturn(profileResponse);
 
-        mockMvc.perform(get("/api/v1/profile/user-123"))
+        mockMvc.perform(get("/api/v1/bond/user-123"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value("user-123"))
                 .andExpect(jsonPath("$.displayName").value("Alice In Chains"))
@@ -89,31 +95,15 @@ class ProfileControllerTest {
     }
 
     @Test
-    void updateProfile_validRequest_returnsUpdatedProfile() throws Exception {
-        when(profileService.updateProfile(any(User.class), any(UpdateProfileRequest.class)))
-                .thenReturn(profileResponse);
-
-        mockMvc.perform(put("/api/v1/profile/me")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId").value("user-123"));
-
-        // Note: In tests using excludeAutoConfiguration, @AuthenticationPrincipal resolves to null/default or we mock it.
-        // Spring Security is disabled for this test slice, so principal will be null or injected depending on setup.
-        verify(profileService, times(1)).updateProfile(any(), any(UpdateProfileRequest.class));
-    }
-
-    @Test
     void uploadAvatar_validMultipartFile_returnsProfileResponse() throws Exception {
         MockMultipartFile file = new MockMultipartFile("file", "avatar.png", "image/png", new byte[]{1, 2, 3});
-        when(profileService.uploadAvatar(any(), any())).thenReturn(profileResponse);
+        when(profileService.updateAvatar(any(), any())).thenReturn(profileResponse);
 
-        mockMvc.perform(multipart("/api/v1/profile/me/avatar").file(file))
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/v1/bond/me/avatar").file(file))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.avatarUrl").value("http://cdn/avatar.jpg"));
 
-        verify(profileService, times(1)).uploadAvatar(any(), any());
+        verify(profileService, times(1)).updateAvatar(any(), any());
     }
 
     @Test
@@ -121,7 +111,7 @@ class ProfileControllerTest {
         MockMultipartFile file = new MockMultipartFile("file", "cover.png", "image/png", new byte[]{1, 2, 3});
         when(profileService.uploadCover(any(), any())).thenReturn(profileResponse);
 
-        mockMvc.perform(multipart("/api/v1/profile/me/cover").file(file))
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/v1/bond/me/cover").file(file))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.coverUrl").value("http://cdn/cover.jpg"));
 

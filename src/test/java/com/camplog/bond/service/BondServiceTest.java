@@ -1,13 +1,11 @@
-package com.camplog.profile.service;
+package com.camplog.bond.service;
 
-import com.camplog.Bond.service.MediaService;
+import com.camplog.bond.model.UserProfile;
 import com.camplog.auth.model.User;
 import com.camplog.auth.repository.UserRepository;
-import com.camplog.Bond.dto.ProfileResponse;
-import com.camplog.profile.dto.UpdateProfileRequest;
-import com.camplog.profile.repository.PostLikeRepository;
-import com.camplog.profile.repository.PostRepository;
-import com.camplog.Bond.repository.SupporterProfileRepository;
+import com.camplog.bond.dto.ProfileResponse;
+import com.camplog.pokedex.dto.UpdateProfileRequest;
+import com.camplog.bond.repository.UserProfileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,22 +25,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProfileServiceTest {
+class BondServiceTest {
 
     @Mock
     private UserRepository userRepository;
 
     @Mock
-    private SupporterProfileRepository supporterProfileRepository;
-
-    @Mock
-    private PostRepository postRepository;
-
-    @Mock
-    private PostLikeRepository postLikeRepository;
-
-    @Mock
-    private UserInterestRepository userInterestRepository;
+    private UserProfileRepository userProfileRepository;
 
     @Mock
     private MediaService mediaService;
@@ -52,7 +40,7 @@ class ProfileServiceTest {
     private ProfileService profileService;
 
     private User user;
-    private SupporterProfile profile;
+    private UserProfile profile;
     private UpdateProfileRequest updateRequest;
 
     @BeforeEach
@@ -68,7 +56,7 @@ class ProfileServiceTest {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        profile = SupporterProfile.builder()
+        profile = UserProfile.builder()
                 .id("profile-123")
                 .user(user)
                 .displayName("Alice In Chains")
@@ -91,18 +79,13 @@ class ProfileServiceTest {
     @Test
     void getProfile_existingUser_returnsProfileResponse() {
         when(userRepository.findById("user-123")).thenReturn(Optional.of(user));
-        when(supporterProfileRepository.findByUserId("user-123")).thenReturn(Optional.of(profile));
-        when(postRepository.countByAuthorId("user-123")).thenReturn(10);
-        when(postLikeRepository.countTotalLikesReceivedByAuthor("user-123")).thenReturn(42);
-        when(userInterestRepository.findByUserId("user-123")).thenReturn(new ArrayList<>());
+        when(userProfileRepository.findByUserId("user-123")).thenReturn(Optional.of(profile));
 
         ProfileResponse response = profileService.getProfile("user-123");
 
         assertNotNull(response);
         assertEquals("user-123", response.getUserId());
         assertEquals("Alice In Chains", response.getDisplayName());
-        assertEquals(10, response.getPostsCount());
-        assertEquals(42, response.getLikesReceivedCount());
         assertEquals("Seattle, WA", response.getLocation());
     }
 
@@ -118,36 +101,15 @@ class ProfileServiceTest {
     }
 
     @Test
-    void updateProfile_existingProfile_updatesFieldsAndReturnsResponse() {
-        when(userRepository.findById("user-123")).thenReturn(Optional.of(user));
-        when(supporterProfileRepository.findByUserId("user-123")).thenReturn(Optional.of(profile));
-        when(supporterProfileRepository.save(any(SupporterProfile.class))).thenReturn(profile);
-        when(postRepository.countByAuthorId("user-123")).thenReturn(10);
-        when(postLikeRepository.countTotalLikesReceivedByAuthor("user-123")).thenReturn(42);
-        when(userInterestRepository.findByUserId("user-123")).thenReturn(new ArrayList<>());
-
-        ProfileResponse response = profileService.updateProfile(user, updateRequest);
-
-        assertNotNull(response);
-        assertEquals("Alice In Chains Updated", response.getDisplayName());
-        assertEquals("New Bio", user.getBio());
-        verify(userRepository, times(1)).save(user);
-        verify(supporterProfileRepository, times(1)).save(profile);
-    }
-
-    @Test
     void uploadAvatar_validFile_uploadsAndUpdatesUser() {
         MockMultipartFile file = new MockMultipartFile("file", "avatar.png", "image/png", new byte[]{1, 2, 3});
         MediaService.MediaUploadResult uploadResult = new MediaService.MediaUploadResult("http://cdn/avatar-new.jpg", "avatar-key");
 
         when(mediaService.uploadAvatar(any(MultipartFile.class), eq("user-123"))).thenReturn(uploadResult);
         when(userRepository.findById("user-123")).thenReturn(Optional.of(user));
-        when(supporterProfileRepository.findByUserId("user-123")).thenReturn(Optional.of(profile));
-        when(postRepository.countByAuthorId("user-123")).thenReturn(10);
-        when(postLikeRepository.countTotalLikesReceivedByAuthor("user-123")).thenReturn(42);
-        when(userInterestRepository.findByUserId("user-123")).thenReturn(new ArrayList<>());
+        when(userProfileRepository.findByUserId("user-123")).thenReturn(Optional.of(profile));
 
-        ProfileResponse response = profileService.uploadAvatar(user, file);
+        ProfileResponse response = profileService.updateAvatar(user, file);
 
         assertNotNull(response);
         assertEquals("http://cdn/avatar-new.jpg", response.getAvatarUrl());
@@ -162,10 +124,7 @@ class ProfileServiceTest {
 
         when(mediaService.uploadCover(any(MultipartFile.class), eq("user-123"))).thenReturn(uploadResult);
         when(userRepository.findById("user-123")).thenReturn(Optional.of(user));
-        when(supporterProfileRepository.findByUserId("user-123")).thenReturn(Optional.of(profile));
-        when(postRepository.countByAuthorId("user-123")).thenReturn(10);
-        when(postLikeRepository.countTotalLikesReceivedByAuthor("user-123")).thenReturn(42);
-        when(userInterestRepository.findByUserId("user-123")).thenReturn(new ArrayList<>());
+        when(userProfileRepository.findByUserId("user-123")).thenReturn(Optional.of(profile));
 
         ProfileResponse response = profileService.uploadCover(user, file);
 

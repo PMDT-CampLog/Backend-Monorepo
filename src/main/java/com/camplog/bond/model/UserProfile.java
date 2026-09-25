@@ -1,4 +1,4 @@
-package com.camplog.Bond.model;
+package com.camplog.bond.model;
 
 import com.camplog.auth.model.User;
 import jakarta.persistence.*;

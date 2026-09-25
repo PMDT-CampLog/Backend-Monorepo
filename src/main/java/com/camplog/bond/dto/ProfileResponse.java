@@ -1,4 +1,4 @@
-package com.camplog.Bond.dto;
+package com.camplog.bond.dto;
 
 import lombok.*;
 

@@ -1,4 +1,4 @@
-package com.camplog.Bond.service;
+package com.camplog.bond.service;
 
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;

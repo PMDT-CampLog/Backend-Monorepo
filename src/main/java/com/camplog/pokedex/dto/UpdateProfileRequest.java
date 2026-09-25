@@ -1,4 +1,4 @@
-package com.camplog.profile.dto;
+package com.camplog.pokedex.dto;
 
 import jakarta.validation.constraints.Size;
 import lombok.*;

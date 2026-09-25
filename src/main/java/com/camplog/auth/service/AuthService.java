@@ -8,6 +8,8 @@ import com.camplog.auth.event.UserCreatedEvent;
 import com.camplog.auth.model.AuthProvider;
 import com.camplog.auth.model.User;
 import com.camplog.auth.repository.UserRepository;
+import com.camplog.pokedex.model.PublicProfile;
+import com.camplog.pokedex.repository.PublicProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -23,6 +25,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +38,7 @@ import org.springframework.beans.factory.annotation.Value;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final PublicProfileRepository publicProfileRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final ApplicationEventPublisher eventPublisher;
@@ -72,8 +76,20 @@ public class AuthService {
                 .provider(AuthProvider.LOCAL)
                 .build();
 
+
         User savedUser = userRepository.save(newUser);
+
+        PublicProfile publicProfile = PublicProfile.builder()
+                .user(savedUser)
+                .username("user_" + savedUser.getName()) //Provisorio, troca ao botar username
+                .avatarUrl(savedUser.getAvatarUrl())
+                .coverUrl(savedUser.getCoverUrl())
+                .build();
+
+        PublicProfile publicProfileSaved = publicProfileRepository.save(publicProfile);
+
         log.info("Usuário cadastrado com ID: {}", savedUser.getId());
+        log.info("Usuário publico criado com id: {} e username: {}", publicProfileSaved.getId(), publicProfileSaved.getUsername());
 
         // Dispara o evento de criação de usuário para as tarefas de segundo plano
         eventPublisher.publishEvent(new UserCreatedEvent(this, savedUser));
